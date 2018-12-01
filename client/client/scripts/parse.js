@@ -1,6 +1,6 @@
 var Parse = {
 
-  server: `http://parse.${window.CAMPUS}.hackreactor.com/chatterbox/classes/messages`,
+  server: `http://127.0.0.1:3000/`,
 
   create: function(message, successCB, errorCB = null) {
 
