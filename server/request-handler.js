@@ -11,6 +11,7 @@ this file and include it in basic-server.js so that it actually works.
 *Hint* Check out the node module documentation at http://nodejs.org/api/modules.html.
 
 **************************************************************/
+let results = [];
 
 exports.requestHandler = function(request, response) {
   // Request and Response come from node's http module.
@@ -29,31 +30,34 @@ exports.requestHandler = function(request, response) {
   // console.logs in your code.
 
   const { method, url } = request;
-  // console.log(request);
-  // console.log(response);
+
+  // Build chunk
+  let data = '';
+
   const headers = {
     'access-control-allow-origin': '*',
     'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
     'access-control-allow-headers': 'content-type, accept',
     'access-control-max-age': 10
   };
-  let results = [];
 
-  if (url !== '/classes/messages') {
-    response.statusCode = 404;
-    response._responseCode = 404;
-    response.end();
-  } else if (request.method === 'GET') {
+  // if (url !== '/classes/messages') {
+  //   response.statusCode = 404;
+  //   response._responseCode = 404;
+  //   response.end();
+  // } 
+
+  if (request.method === 'GET') {
     var statusCode = 200;
     headers['Content-Type'] = 'application/json';
     response.writeHead(statusCode, headers);
-    const responseBody = { results, method, url };
+    const responseBody = { results };
     response.end(JSON.stringify(responseBody));
   } else if (request.method === 'POST') {
     request.on('data', (chunk) => {
-      results.push(chunk);
+      data += chunk;
     }).on('end', () => {
-      results = results.concat(results);
+      results.push(JSON.parse(data));
       var statusCode = 201;
       headers['Content-Type'] = 'application/json';
       response.writeHead(statusCode, headers);
