@@ -29,6 +29,8 @@ exports.requestHandler = function(request, response) {
   // console.logs in your code.
 
   const { method, url } = request;
+  // console.log(request);
+  // console.log(response);
   const headers = {
     'access-control-allow-origin': '*',
     'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
@@ -37,43 +39,26 @@ exports.requestHandler = function(request, response) {
   };
   let results = [];
 
-  request.on('error', (err) => {
-    console.error(err);
-  });
-  response.on('error', (err) => {
-    console.error(err);
-  });
-  
-
-  if (request.method === 'GET') {
-    request.on('data', (chunk) => {
-      results.push(chunk);
-    }).on('end', () => {
-      results = results.concat(results);
-    
-      var statusCode = 200;
-      headers['Content-Type'] = 'application/json';
-      response.writeHead(statusCode, headers);
-      
-      const responseBody = { results };
-      response.end(JSON.stringify(responseBody));
-    });
+  if (url !== '/classes/messages') {
+    response.statusCode = 404;
+    response.end();
+  } else if (request.method === 'GET') {
+    var statusCode = 200;
+    headers['Content-Type'] = 'application/json';
+    response.writeHead(statusCode, headers);
+    const responseBody = { results, method, url };
+    response.end(JSON.stringify(responseBody));
   } else if (request.method === 'POST') {
     request.on('data', (chunk) => {
       results.push(chunk);
     }).on('end', () => {
       results = results.concat(results);
-    
       var statusCode = 201;
       headers['Content-Type'] = 'application/json';
       response.writeHead(statusCode, headers);
-      
       const responseBody = { results };
       response.end(JSON.stringify(responseBody));
     });
-  } else {
-    response.statusCode = 404;
-    response.end();
   }
 
   // console.log('Serving request type ' + method + ' for url ' + url);
