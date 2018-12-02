@@ -1,16 +1,8 @@
 /*************************************************************
-
-You should implement your request handler function in this file.
-
-requestHandler is already getting passed to http.createServer()
-in basic-server.js, but it won't work as is.
-
-You'll have to figure out a way to export this function from
-this file and include it in basic-server.js so that it actually works.
-
 *Hint* Check out the node module documentation at http://nodejs.org/api/modules.html.
-
 **************************************************************/
+const urlModule = require('url');
+const _ = require('underscore');
 let results = [];
 
 exports.requestHandler = function(request, response) {
@@ -35,21 +27,34 @@ exports.requestHandler = function(request, response) {
 
   // Build chunk
   let data = '';
-
+  let statusCode;
   const headers = {
-    'access-control-allow-origin': '*',
-    'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
-    'access-control-allow-headers': 'content-type, accept',
-    'access-control-max-age': 10
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'content-type, accept',
+    'Access-Control-Max-Age': 10,
+    'Access-Control-Allow-Credentials': true,
+    'Content-Type': 'application/json'
   };
 
-  if (url === '/classes/messages' || url === '/') {
-    if (request.method === 'GET') {
-      var statusCode = 200;
+  if (method === 'OPTIONS') {
+    const urlSearch = urlModule.parse(url).search;
+    if (!urlSearch && urlSearch !== null) {
+      const sortCriteria = urlSearch.slice(7);
+      results = _.sortBy(results, sortCriteria);
+    }
+    statusCode = 200;
+    response.writeHead(statusCode, headers);
+    const responseBody = { results };
+    response.end(JSON.stringify(responseBody));
+
+  } else if (url.includes('/classes/messages')) {
+    if (method === 'GET') {
+      statusCode = 200;
 
       // .writeHead() writes to the request line and headers of the response,
       // which includes the status and all headers.
-      headers['Content-Type'] = 'application/json';
+      // headers['Content-Type'] = 'application/json';
       response.writeHead(statusCode, headers);
       const responseBody = { results };
 
@@ -62,13 +67,13 @@ exports.requestHandler = function(request, response) {
       // node to actually send all the data over to the client.
       response.end(JSON.stringify(responseBody));
 
-    } else if (request.method === 'POST') {
+    } else if (method === 'POST') {
       request.on('data', (chunk) => {
         data += chunk;
       }).on('end', () => {
         results.push(JSON.parse(data));
-        var statusCode = 201;
-        headers['Content-Type'] = 'application/json';
+        statusCode = 201;
+        // headers['Content-Type'] = 'application/json';
         response.writeHead(statusCode, headers);
         const responseBody = { results };
         response.end(JSON.stringify(responseBody));
