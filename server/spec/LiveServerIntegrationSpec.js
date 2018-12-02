@@ -73,5 +73,44 @@ describe('server', function() {
     });
   });
 
+  it('Should respond with messages that include an objectId property', function(done) {
+    var requestParams = {method: 'POST',
+      uri: 'http://127.0.0.1:3000/classes/messages',
+      json: {
+        username: 'Human',
+        text: 'Hi.',
+        objectId: '12345'
+      }
+    };
+
+    request(requestParams, function(error, response, body) {
+      // Now if we request the log, that message we posted should be there:
+      request('http://127.0.0.1:3000/classes/messages', function(error, response, body) {
+        var messages = JSON.parse(body).results;
+        expect(messages[0].objectId).to.exist;
+        done();
+      });
+    });
+  });
+
+  it('Should respond with messages that include a roomname property', function(done) {
+    var requestParams = {method: 'POST',
+      uri: 'http://127.0.0.1:3000/classes/messages',
+      json: {
+        username: 'Human',
+        text: 'Hi.',
+        roomname: 'house',
+      }
+    };
+
+    request(requestParams, function(error, response, body) {
+      // Now if we request the log, that message we posted should be there:
+      request('http://127.0.0.1:3000/classes/messages', function(error, response, body) {
+        var messages = JSON.parse(body).results;
+        expect(messages[0].roomname).to.be.a('string');
+        done();
+      });
+    });
+  });
 
 });

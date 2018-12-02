@@ -103,4 +103,49 @@ describe('Node Server Request Listener Function', function() {
     expect(res._ended).to.equal(true);
   });
 
+  it('Should account for cross-origin resource sharing in the headers', function() {
+    var req = new stubs.request('/classes/messages', 'GET');
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    expect(res._headers['Access-Control-Allow-Origin']).to.equal('*');
+    expect(res._headers['Access-Control-Allow-Methods']).to.exist;
+    expect(res._headers['Access-Control-Allow-Headers']).to.exist;
+  });
+  
+  it('Should handle OPTIONS requests', function() {
+    var req = new stubs.request('/classes/messages', 'OPTIONS');
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    expect(req.method).to.equal('OPTIONS');
+    expect(res._responseCode).to.equal(200);
+    expect(res._ended).to.equal(true);
+  });
+
+  it('Should allow the results array to persist', function() {
+    var stubMsg1 = {
+      username: 'Human123',
+      text: 'Here.'
+    };
+    var stubMsg2 = {
+      username: 'Human123',
+      text: 'Still here.'
+    };
+    var req1 = new stubs.request('/classes/messages', 'POST', stubMsg1);
+    var req2 = new stubs.request('/classes/messages', 'POST', stubMsg2);
+    var res1 = new stubs.response();
+    var res2 = new stubs.response();
+
+    handler.requestHandler(req1, res1);
+    var parsedBody1 = JSON.parse(res1._data);
+    handler.requestHandler(req2, res2);
+    var parsedBody2 = JSON.parse(res2._data);
+    expect(parsedBody1.results).to.include(stubMsg1);
+    expect(parsedBody2.results).to.include(stubMsg1);
+    expect(parsedBody2.results).to.include(stubMsg2);
+  });
+
 });

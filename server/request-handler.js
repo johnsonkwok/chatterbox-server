@@ -3,7 +3,7 @@
 **************************************************************/
 const urlModule = require('url');
 const _ = require('underscore');
-let results = [];
+let results = [{username: 'Jono', text: 'Do my bidding!', objectId: Date.now(), roomname: 'lobby'}];
 
 exports.requestHandler = function(request, response) {
   // Request and Response come from node's http module.
@@ -73,7 +73,6 @@ exports.requestHandler = function(request, response) {
       }).on('end', () => {
         results.push(JSON.parse(data));
         statusCode = 201;
-        // headers['Content-Type'] = 'application/json';
         response.writeHead(statusCode, headers);
         const responseBody = { results };
         response.end(JSON.stringify(responseBody));
